@@ -153,12 +153,6 @@ START-OF-SELECTION.
 
 FORM seleciona_dados.
 
-  DATA: lt_ekes_aux TYPE TABLE OF ty_ekes.
-
-  DATA: ls_ekes_aux TYPE ty_ekes.
-
-  DATA: lv_ebeln TYPE ebeln.
-
   SELECT  docnum
           nftype
           doctyp
@@ -235,27 +229,18 @@ FORM seleciona_dados.
         SORT t_j1bnfstx BY docnum itmnum taxtyp.
       ENDIF.
 
-      LOOP AT t_j1bnflin INTO w_j1bnflin.
-        lv_ebeln = w_j1bnflin-xped.
-
-        SELECT ebeln
-               xblnr
-               vbeln
-               vbelp
-          FROM ekes
-          INTO TABLE lt_ekes_aux
-          WHERE ebeln EQ lv_ebeln.
-
-        IF sy-subrc IS INITIAL.
-          READ TABLE lt_ekes_aux INTO ls_ekes_aux INDEX 1.
-          MOVE-CORRESPONDING ls_ekes_aux TO w_ekes.
-          APPEND w_ekes TO t_ekes.
-
-          CLEAR: w_ekes, ls_ekes_aux.
-        ENDIF.
-      ENDLOOP.
-
-      SORT t_ekes by ebeln.
+      SELECT ebeln
+             xblnr
+             vbeln
+             vbelp
+        FROM ekes
+        INTO TABLE lt_ekes_aux
+        WHERE ebeln EQ w_j1bnflin-xped(10).
+      
+      IF sy-subrc IS INITIAL.
+        SORT t_ekes by ebeln.
+      ENDIF.
+      
     ENDIF.
 
   ELSE.
@@ -268,7 +253,8 @@ ENDFORM.
 
 FORM tratar_dados.
 
-  DATA: lv_ebeln TYPE ebeln.
+  DATA: lv_ebeln TYPE ebeln,
+        lv_ebelp TYPE ebelp.
 
   CLEAR w_j1bnflin.
 
@@ -315,10 +301,12 @@ FORM tratar_dados.
     ENDIF.
 
     lv_ebeln = w_j1bnflin-xped.
+    lv_ebelp = w_j1bnflin-nitemped.
 
     READ TABLE t_ekes INTO w_ekes
                       WITH KEY ebeln = lv_ebeln
-                      BINARY SEARCH.
+                               ebelp = lv_ebelp
+                               BINARY SEARCH.
 
     IF sy-subrc IS INITIAL.
       w_saida-xblnr = w_ekes-xblnr.
