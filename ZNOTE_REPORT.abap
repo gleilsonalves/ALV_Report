@@ -234,7 +234,7 @@ FORM seleciona_dados.
              vbeln
              vbelp
         FROM ekes
-        INTO TABLE lt_ekes_aux
+        INTO TABLE t_ekes
         WHERE ebeln EQ w_j1bnflin-xped(10).
       
       IF sy-subrc IS INITIAL.
